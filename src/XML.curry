@@ -5,8 +5,7 @@
 --- might be changed in the future!
 ---
 --- @author Michael Hanus
---- @version January 2011
---- @category web
+--- @version September 2017
 ------------------------------------------------------------------------------
 
 module XML(XmlExp(..),Encoding(..),XmlDocParams(..),
@@ -68,6 +67,7 @@ iso88591Encoding (c:cs) =
 
 -- iso-8859-1-list
 -- not yet completed...
+iso88591list :: [Int]
 iso88591list = [192,193,194,195,196,197,198,199,200,201,202,203,204,205,207,
                 208,209,210,211,212,214,216,217,218,219,220,221,224,225,228,
                 229,226,227,230,231,233,232,235,234,236,237,239,240,241,248,
@@ -90,8 +90,9 @@ lookupEncoding [] = StandardEnc
 
 -- get the first DtdUrl from a list of XmlDocParams
 lookupDtdUrl :: [XmlDocParams] -> String
-lookupDtdUrl (Enc _:l) = lookupDtdUrl l
-lookupDtdUrl (DtdUrl url:_) = url
+lookupDtdUrl []               = ""
+lookupDtdUrl (Enc _      : l) = lookupDtdUrl l
+lookupDtdUrl (DtdUrl url : _) = url
 
 -- does a XmlDocParam include a DtdUrl?
 hasDtdUrl :: [XmlDocParams] -> Bool
@@ -172,6 +173,8 @@ showXmlDocWithParams ps (XElem root attrL xmlEL) =
     else "") ++
    showXmlExp 0 (encoding2EncFunc (lookupEncoding ps))
                 (XElem root attrL xmlEL)
+showXmlDocWithParams _ (XText _) =
+  error "XML.showXmlDocWithParams: document without tags"
 
 showXmlExp :: Int -> (String -> String) -> XmlExp -> String
 showXmlExp i encFun (XText s)  = xtab i ++ (encFun s) ++ "\n"
@@ -185,8 +188,10 @@ showXmlExp i encFun (XElem tag attrs xexps) =
        else ">\n" ++ showXmlExps (i+2) xexps encFun ++
             xtab i ++ "</" ++ tag ++ ">\n"
 
+xtab :: Int -> String
 xtab n = take n (repeat ' ')
 
+showXmlOpenTag :: String -> [(String, a)] -> (a -> String) -> String
 showXmlOpenTag tag attrs encFun =
   "<" ++ tag ++ concat (map ((" "++) . attr2string) attrs)
   where attr2string (attr,value) = attr ++ "=\""
@@ -207,6 +212,7 @@ xmlUnquoteSpecials (c:cs)
                  in xmlUnquoteSpecial special rest
   | otherwise = c : xmlUnquoteSpecials cs
 
+xmlUnquoteSpecial :: String -> String -> String
 xmlUnquoteSpecial special cs
   | special=="lt"   = '<'  : xmlUnquoteSpecials cs
   | special=="gt"   = '>'  : xmlUnquoteSpecials cs
@@ -326,6 +332,7 @@ scanXmlElem (c:cs)
  | c=='?' = scanXmlProcInstr cs
  | otherwise = scanXmlElemName [c] cs
 
+scanXmlElemName :: String -> String -> [XmlExp]
 scanXmlElemName ct [] = [XElem ('<':ct) [] []]
 scanXmlElemName ct (c:cs)
   | c=='>'    = XElem ('<':ct) [] [] : scanXmlString cs
@@ -351,6 +358,7 @@ scanXmlCData cs =
   in  if head rest == '>' then scanXmlString (tail rest)
                           else scanXmlCData rest
 
+dropCData :: String -> String
 dropCData [] = []
 dropCData (c:cs) 
  | c=='[' = tail (dropWhile (/=']') cs) -- must be improved
@@ -376,9 +384,11 @@ parseAttrs (c:cs)
  | otherwise = ([],c:cs)
 
 -- drop blanks in input string:
+dropBlanks :: String -> String
 dropBlanks = dropWhile isSpace
 
 -- split string at particular character, if possible:
+splitAtChar :: Char -> String -> (String, String)
 splitAtChar _ [] = ([],[])
 splitAtChar char (c:cs) =
  if c==char then ([],cs)
