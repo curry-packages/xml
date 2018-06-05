@@ -279,7 +279,7 @@ parseXmlString s = fst (parseXmlTokens (scanXmlString s) Nothing)
 -- parseXmlTokens tokens stoptoken = (xml_expressions, remaining_tokens)
 parseXmlTokens :: [XmlExp] -> Maybe String -> ([XmlExp],[XmlExp])
 parseXmlTokens [] Nothing  = ([],[])
-parseXmlTokens [] (Just _) = error "Internal error in XML.parseXmlTokens"
+parseXmlTokens [] (Just _) = error "XML.parseXmlTokens: incomplete parse"
 parseXmlTokens (XText s : xtokens) stop =
   let (xexps, rem_xtokens) = parseXmlTokens xtokens stop
   in  (XText (xmlUnquoteSpecials s) : xexps, rem_xtokens)
@@ -296,7 +296,7 @@ parseXmlTokens (XElem (t:ts) args cont : xtokens) stop
  | otherwise = let (xexps, rem_xtokens) = parseXmlTokens xtokens stop
                in  (XElem (t:ts) args cont : xexps, rem_xtokens)
 parseXmlTokens (XElem [] _ _ : _) _ =
-  error "Internal error in XML.parseXmlTokens"
+  error "XML.parseXmlTokens: incomplete parse"
 
 
 -- scan an XML string into list of XML tokens:
