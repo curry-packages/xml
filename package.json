@@ -6,6 +6,7 @@
     "synopsis": "Libraries for XML processing",
     "category": [ "Data", "Web" ],
     "dependencies": {
+        "base" : ">= 2.0.0"
     },
     "compilerCompatibility": {
         "pakcs": ">= 2.0.0",
