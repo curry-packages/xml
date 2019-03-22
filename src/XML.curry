@@ -5,7 +5,7 @@
 --- might be changed in the future!
 ---
 --- @author Michael Hanus
---- @version September 2017
+--- @version June 2018
 ------------------------------------------------------------------------------
 
 module XML(XmlExp(..),Encoding(..),XmlDocParams(..),
@@ -15,8 +15,8 @@ module XML(XmlExp(..),Encoding(..),XmlDocParams(..),
        readUnsafeXmlFile,readFileWithXmlDocs,updateXmlFile) where
 
 import Data.Char
-import Numeric
 import Data.List (intersperse)
+import Numeric
 
 ------------------------------------------------------------------------------
 --- The data type for representing XML expressions.
@@ -48,7 +48,7 @@ encoding2EncFunc Iso88591Enc = iso88591Encoding
 -- standard encoding map
 standardEncoding :: String -> String
 standardEncoding [] = []
-standardEncoding (c:cs)
+standardEncoding (c:cs) 
    | c=='<'      = "&lt;"   ++ standardEncoding cs
    | c=='>'      = "&gt;"   ++ standardEncoding cs
    | c=='&'      = "&amp;"  ++ standardEncoding cs
@@ -61,7 +61,7 @@ standardEncoding (c:cs)
 -- iso-8859-1
 iso88591Encoding :: String -> String
 iso88591Encoding [] = []
-iso88591Encoding (c:cs) =
+iso88591Encoding (c:cs) = 
    if ord c `elem` iso88591list
    then c : iso88591Encoding cs
    else standardEncoding [c] ++ iso88591Encoding cs
@@ -148,7 +148,7 @@ xml t c = XElem t [] c
 ------------------------------------------------------------------------------
 --- Writes a file with a given XML document.
 writeXmlFile :: String -> XmlExp -> IO ()
-writeXmlFile file xexp =
+writeXmlFile file xexp = 
    writeXmlFileWithParams file [Enc StandardEnc] xexp
 
 --- Writes a file with a given XML document and XML parameters.
@@ -166,7 +166,7 @@ showXmlDoc xexp = showXmlDocWithParams [] xexp
 
 showXmlDocWithParams :: [XmlDocParams] -> XmlExp -> String
 showXmlDocWithParams ps (XElem root attrL xmlEL) =
-   "<?xml version=\"1.0\" " ++
+   "<?xml version=\"1.0\" " ++ 
    (encoding2Attribute (lookupEncoding ps)) ++ "standalone=\"" ++
    (if hasDtdUrl ps then "no" else "yes") ++ "\"?>\n\n" ++
    (if hasDtdUrl ps
@@ -233,9 +233,10 @@ unquoteUnicode :: String -> String
 unquoteUnicode [] = []
 unquoteUnicode (c:cs)
   | c=='#'     = case cs of
-                   'x':cs' -> let [(hex, _)] = readHex cs' in [chr hex]
-                   _       -> let [(int, _)] = readInt cs  in [chr int]
+                   'x':cs' -> [chr (extr (readHex cs'))]
+                   cs'     -> [chr (extr (readInt cs'))]
   | otherwise  = '&':(c:cs) ++ ";"
+  where extr [(a,"")] = a
 
 ------------------------------------------------------------------------------
 -- Parser for XML documents
@@ -279,7 +280,8 @@ parseXmlString s = fst (parseXmlTokens (scanXmlString s) Nothing)
 -- parse a list of XML tokens into list of XML expressions:
 -- parseXmlTokens tokens stoptoken = (xml_expressions, remaining_tokens)
 parseXmlTokens :: [XmlExp] -> Maybe String -> ([XmlExp],[XmlExp])
-parseXmlTokens [] Nothing = ([],[])
+parseXmlTokens [] Nothing  = ([],[])
+parseXmlTokens [] (Just _) = error "XML.parseXmlTokens: incomplete parse"
 parseXmlTokens (XText s : xtokens) stop =
   let (xexps, rem_xtokens) = parseXmlTokens xtokens stop
   in  (XText (xmlUnquoteSpecials s) : xexps, rem_xtokens)
@@ -295,6 +297,8 @@ parseXmlTokens (XElem (t:ts) args cont : xtokens) stop
           in  (XElem ts args cont : xexps, rem_xtokens)
  | otherwise = let (xexps, rem_xtokens) = parseXmlTokens xtokens stop
                in  (XElem (t:ts) args cont : xexps, rem_xtokens)
+parseXmlTokens (XElem [] _ _ : _) _ =
+  error "XML.parseXmlTokens: incomplete parse"
 
 
 -- scan an XML string into list of XML tokens:
@@ -361,7 +365,7 @@ scanXmlCData cs =
 
 dropCData :: String -> String
 dropCData [] = []
-dropCData (c:cs)
+dropCData (c:cs) 
  | c=='[' = tail (dropWhile (/=']') cs) -- must be improved
  | c=='>' = c:cs
  | otherwise = dropCData cs
