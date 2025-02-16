@@ -1,7 +1,4 @@
 -- Some examples for matching in XML documents based on the `XCuery` library.
---
--- Note that this module requires the installation
--- of the package `setfunctions`!
 
 import Control.Search.SetFunctions
 
