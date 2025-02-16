@@ -8,12 +8,12 @@
 ---
 --- The ideas and usage of this library is described in the paper
 ---
---- > M. Hanus: Declarative Processing of Semistructured Web Data
+--- > M. Hanus: Declarative Processing of Semistructured Web Data.
 --- > Technical Communications of the 27th International Conference
 --- > on Logic Programming (ICLP 2011),
 --- > Leibniz International Proceedings in Informatics (LIPIcs),
 --- > Vol. 11, pp. 198-208, 2011
---- > Online: https://doi.org/10.4230/LIPIcs.ICLP.2011.198
+--- > [Online](https://doi.org/10.4230/LIPIcs.ICLP.2011.198)
 ---
 --- @author Michael Hanus
 --- @version February 2025
