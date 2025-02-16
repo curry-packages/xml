@@ -24,6 +24,9 @@
         { "src-dir": "src",
           "options": "--nosource",
           "modules": [  "XmlConv" ]
+        },
+        { "src-dir": "examples",
+          "modules": [  "XmlMatching" ]
         }
     ],
     "documentation": {
