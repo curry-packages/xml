@@ -25,5 +25,9 @@
           "options": "--nosource",
           "modules": [  "XmlConv" ]
         }
-    ]
+    ],
+    "documentation": {
+        "src-dir": "docs",
+        "main": "paper.tex"
+    }
 }
